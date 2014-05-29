@@ -11,7 +11,7 @@
     %tr
       %th{:class =>"#{@title_class}"}= sortable( 'title','Movie Title','title_header')
       %th Rating
-      %th{:class =>"#{@release_class}"}= sortable( 'release_date', 'Release Date') 
+      %th{:class =>"#{@release_class}"}= sortable( 'release_date', 'Release Date', 'release_date_header') 
       %th More Info
   %tbody
     - @movies.each do |movie|
