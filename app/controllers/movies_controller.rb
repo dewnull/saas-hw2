@@ -6,11 +6,13 @@ class MoviesController < ApplicationController
   end
 
   def index
+    @all_ratings =Movie.ratings.keys
+    @selected= params[:ratings].nil? ? @all_ratings : params[:ratings].keys
     sort_column= Movie.column_names.include?(params[:sort]) ? params[:sort] : "title"
     sort_direction= %w[asc desc].include?(params[:direction]) ? params[:direction] : "asc"
     @title_class = "title" == sort_column ? "hilite" : nil
     @release_class= "release_date" == sort_column ? "hilite" : nil
-    @movies = Movie.order(sort_column + " " + sort_direction)
+    @movies = Movie.find_all_by_rating(@selected, order: sort_column + " " + sort_direction)
   end
 
   def new
