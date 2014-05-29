@@ -7,9 +7,9 @@ class MoviesController < ApplicationController
 
   def index
     @all_ratings =Movie.ratings.keys
-    @selected= params[:ratings].nil? ? @all_ratings : params[:ratings].keys
-    sort_column= Movie.column_names.include?(params[:sort]) ? params[:sort] : "title"
-    sort_direction= %w[asc desc].include?(params[:direction]) ? params[:direction] : "asc"
+    @selected= selected_rating
+
+
     @title_class = "title" == sort_column ? "hilite" : nil
     @release_class= "release_date" == sort_column ? "hilite" : nil
     @movies = Movie.find_all_by_rating(@selected, order: sort_column + " " + sort_direction)
@@ -40,7 +40,34 @@ class MoviesController < ApplicationController
     @movie = Movie.find(params[:id])
     @movie.destroy
     flash[:notice] = "Movie '#{@movie.title}' deleted."
-    redirect_to movies_path
+    redirect_to movies_path(:sort => session[:sort],:direction =>session[:direction],:rating =>session[:ratings])
   end
-
+  private
+  def sort_column
+    if Movie.column_names.include?(params[:sort])
+      session[:sort]=params[:sort]
+    elsif !(session[:sort].nil?)
+      session[:sort]
+    else
+      "title"
+    end
+  end
+  def sort_direction
+    if %w[asc desc].include?(params[:direction])
+      session[:direction]= params[:direction]
+    elsif !(session[:direction].nil?)
+      session[:direction]
+    else
+      "asc"
+    end
+  end
+  def selected_rating
+    if !(params[:ratings].nil?)
+      session[:ratings] = params[:ratings].keys
+    elsif !(session[:ratings].nil?)
+      session[:ratings]
+    else
+       @all_ratings
+    end
+  end
 end
