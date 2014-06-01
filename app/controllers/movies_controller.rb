@@ -6,13 +6,19 @@ class MoviesController < ApplicationController
   end
 
   def index
+    @redirection = false
     @all_ratings =Movie.ratings.keys
-    @selected= selected_rating
-
-
+    @selected= selected_rating.keys
     @title_class = "title" == sort_column ? "hilite" : nil
     @release_class= "release_date" == sort_column ? "hilite" : nil
-    @movies = Movie.find_all_by_rating(@selected, order: sort_column + " " + sort_direction)
+    @rating= selected_rating
+    @direction= sort_direction
+    @column=sort_column
+    if @redirection
+      redirect_to (movies_path(:ratings => @rating, :direction => @direction, :sort => @column))
+    else
+      @movies = Movie.find_all_by_rating(@selected, order: @column + " " + @direction)
+    end
   end
 
   def new
@@ -47,8 +53,10 @@ class MoviesController < ApplicationController
     if Movie.column_names.include?(params[:sort])
       session[:sort]=params[:sort]
     elsif !(session[:sort].nil?)
+      @redirection = true
       session[:sort]
     else
+     @redirection = true
       "title"
     end
   end
@@ -56,18 +64,22 @@ class MoviesController < ApplicationController
     if %w[asc desc].include?(params[:direction])
       session[:direction]= params[:direction]
     elsif !(session[:direction].nil?)
+     @redirection = true
       session[:direction]
     else
+      @redirection= true
       "asc"
     end
   end
   def selected_rating
-    if !(params[:ratings].nil?)
-      session[:ratings] = params[:ratings].keys
+    if !(params[:ratings].nil?) #and Movie.ratings.keys.include? params[:ratings].keys
+      session[:ratings]= params[:ratings]
     elsif !(session[:ratings].nil?)
+     @redirection =true
       session[:ratings]
     else
-       @all_ratings
+      @redirection = true
+      Movie.ratings
     end
   end
 end
